@@ -1,0 +1,7 @@
+namespace CandidateWebSpy
+{
+    class WebSpy
+    {
+      
+    }
+}
