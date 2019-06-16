@@ -15,6 +15,7 @@ namespace CandidateWebSpy
         public SettingsCredentials Credentials {get; set;}
         public SettingsPolling Polling {get; set;}
         public SettingsLog Log {get; set;}
+        public SettingsMailing Mailing {get; set;}
 
         public static Settings Load(){
             return JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
@@ -34,5 +35,13 @@ namespace CandidateWebSpy
     public class SettingsLog{
         public short Level;
         public short Entries;
+    }
+
+     public class SettingsMailing{
+        public string SmtpServer;
+        public string User;
+        public string Pass;
+        public string From;
+        public string To;
     }
 }

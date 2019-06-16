@@ -1,11 +1,10 @@
 using System;
-using System.IO;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
+using System.Net;
+using System.Net.Mail;
 
 namespace CandidateWebSpy
 {
@@ -70,9 +69,21 @@ namespace CandidateWebSpy
           output.Last = date;
           output.Log.Add(string.Format("{0}: New changes has been detected on {1}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), date.ToString("dd/MM/yyyy HH:mm")));
 
-          while(output.Log.Count > _settings.Log.Entries)
-            output.Log.RemoveAt(0);          
+          SmtpClient client = new SmtpClient(_settings.Mailing.SmtpServer);
+          client.UseDefaultCredentials = false;
+          client.Credentials = new NetworkCredential(_settings.Mailing.User, _settings.Mailing.Pass);
+          
+          MailMessage mailMessage = new MailMessage();
+          mailMessage.From = new MailAddress(_settings.Mailing.From);
+          mailMessage.To.Add(_settings.Mailing.To);
+          mailMessage.IsBodyHtml = true;
+          mailMessage.Body = "<p>New changes has been detected into the applicant's desk.<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>";
+          mailMessage.Subject = "New changes has been detected into the applicant's desk.";
+          client.Send(mailMessage);               
         }
+
+        while(output.Log.Count > _settings.Log.Entries)
+            output.Log.RemoveAt(0);     
 
         Output.Store(output);     
       }

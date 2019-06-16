@@ -1,14 +1,22 @@
 {
     "Credentials" : {
         "ID": "ID",
-        "User": "USER",
-        "Pass": "PASS",
+        "User": "user",
+        "Pass": "pass",
     },    
     "Polling": {
-        "Interval": 3600
+        "Interval": 30
     },    
     "Log": {
         "Level": 1,
         "Entries": 100
+    },
+    "Mailing":
+    {
+        "SmtpServer": "smtp.gmail.com",
+        "User": "user",
+        "Pass": "pass",
+        "From": "from",
+        "To": "To"
     }
 }
