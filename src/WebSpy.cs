@@ -76,9 +76,10 @@ namespace CandidateWebSpy
 
           mailMessage.To.Add(_settings.Mailing.To);         
           using (SmtpClient client = new SmtpClient(_settings.Mailing.SmtpServer)){ 
-            client.Port = 587;       
+            client.Port = _settings.Mailing.SmtpPort;       
             client.Credentials = new NetworkCredential(_settings.Mailing.User, _settings.Mailing.Pass);
-            client.EnableSsl = true;     
+            client.EnableSsl = true;  
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
             client.Send(mailMessage);         
           }      
         }
