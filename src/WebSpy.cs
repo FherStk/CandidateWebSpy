@@ -21,11 +21,11 @@ namespace CandidateWebSpy
         WebBrowser wb = new WebBrowser();          
 
         this.Controls.Add(wb);
-        wb.Visible = true;
-        wb.Size = new System.Drawing.Size(800, 450);
+        wb.Visible = false;
+        //wb.Visible = true;
+        //wb.Size = new System.Drawing.Size(800, 450);
 
         wb.DocumentCompleted += DocumentCompleted;
-        wb.Visible = true;
         wb.ScrollBarsEnabled = false;
         wb.ScriptErrorsSuppressed = true;     
 
@@ -91,7 +91,7 @@ namespace CandidateWebSpy
       }
 
       private void WaitForPolling(WebBrowser wb){      
-        System.Threading.Thread.Sleep(_settings.Polling.Interval);
+        System.Threading.Thread.Sleep(_settings.Polling.Interval*1000);
         Navigate(wb);   
       }
 
