@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace CandidateWebSpy
 {
-    class Program
+    static class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new WebSpy());
         }
     }
 }
