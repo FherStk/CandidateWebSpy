@@ -12,9 +12,9 @@ namespace CandidateWebSpy
         }
         
     public class Settings{
-        SettingsCredentials Credentials {get; set;}
-        SettingsPolling Polling {get; set;}
-        SettingsLog Log {get; set;}
+        public SettingsCredentials Credentials {get; set;}
+        public SettingsPolling Polling {get; set;}
+        public SettingsLog Log {get; set;}
 
         public static Settings Load(){
             return JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json"));
@@ -22,17 +22,17 @@ namespace CandidateWebSpy
     }
 
     public class SettingsCredentials{
-        SettingsID ID {get; set;}
-        string User {get; set;}
-        string Pass {get; set;}  
+        public SettingsID ID {get; set;}
+        public string User {get; set;}
+        public string Pass {get; set;}  
     }
 
     public class SettingsPolling{
-        short Interval {get; set;}
+        public short Interval {get; set;}
     }
 
     public class SettingsLog{
-        short Level;
-        short Entries;
+        public short Level;
+        public short Entries;
     }
 }
