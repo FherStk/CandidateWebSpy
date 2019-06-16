@@ -12,6 +12,7 @@ namespace CandidateWebSpy
     public partial class WebSpy : Form
     {
       private short _step = 0;
+      private Settings _settings;
      
       public WebSpy()
       {
@@ -21,6 +22,8 @@ namespace CandidateWebSpy
       
       public void Start(){      
           WebBrowser wb = new WebBrowser();
+          Settings settings = Settings.Load();
+
           this.Controls.Add(wb);
           wb.Visible = true;
           wb.Size = new System.Drawing.Size(800, 450);
@@ -28,17 +31,21 @@ namespace CandidateWebSpy
           wb.DocumentCompleted += DocumentCompleted;
           wb.Visible = true;
           wb.ScrollBarsEnabled = false;
-          wb.ScriptErrorsSuppressed = true;
-          wb.Navigate("https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12");       
+          wb.ScriptErrorsSuppressed = true;     
+
+          Navigate(wb);     
+      }
+
+      private void Navigate(WebBrowser wb){
+        _step = 0;
+        wb.Navigate("https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12");       
       }
 
       private void DoLogin(WebBrowser wb){              
-        Settings settings = Settings.Load();
-
         // Do what ever you want to do here when page is completely loaded.           
-        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)settings.Credentials.ID).ToString());          
-        wb.Document.GetElementById("P12_USUARI").SetAttribute("value", settings.Credentials.User);
-        wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", settings.Credentials.Pass);
+        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)_settings.Credentials.ID).ToString());          
+        wb.Document.GetElementById("P12_USUARI").SetAttribute("value", _settings.Credentials.User);
+        wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", _settings.Credentials.Pass);
 
         List<HtmlElement> inputs = new List<HtmlElement>(wb.Document.GetElementsByTagName("input").Cast<HtmlElement>());            
         HtmlElement accept = inputs.Where(x => x.GetAttribute("type").Equals("button") && x.GetAttribute("name").Equals("P12_ACCEPTA")).SingleOrDefault();
@@ -55,28 +62,38 @@ namespace CandidateWebSpy
           return DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
       }
 
-      private void CheckChanges(DateTime date){
+      private void StoreChanges(DateTime date){
         Output output = Output.Load();
         
         if(output.Last >= date) output.Log.Add(string.Format("{0}: No changes detected.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")));
         else{
           output.Last = date;
           output.Log.Add(string.Format("{0}: New changes has been detected on {1}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), date.ToString("dd/MM/yyyy HH:mm")));
+
+          while(output.Log.Count > _settings.Log.Entries)
+            output.Log.RemoveAt(0);          
         }
 
         Output.Store(output);     
       }
 
+      private void WaitForPolling(WebBrowser wb){      
+        System.Threading.Thread.Sleep(_settings.Polling.Interval);
+        Navigate(wb);   
+      }
+
       private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
       {
+        WebBrowser wb = (WebBrowser)sender;
         switch(_step++){
           case 0:                         
-            DoLogin((WebBrowser)sender);
+            DoLogin(wb);
             break;
 
           case 1:
-            DateTime date = ReadDate((WebBrowser)sender);
-            CheckChanges(date);
+            DateTime date = ReadDate(wb);
+            StoreChanges(date);
+            WaitForPolling(wb);             
             break;
         }
       }
