@@ -1,14 +1,14 @@
 {
-    "credentials" : {
-        "id": "ID",
-        "user": "USER",
-        "pass": "PASS",
+    "Credentials" : {
+        "ID": "ID",
+        "User": "USER",
+        "Pass": "PASS",
     },    
-    "polling": {
-        "interval": 3600
+    "Polling": {
+        "Interval": 3600
     },    
-    "log": {
-        "level": 1,
-        "entries": 100
+    "Log": {
+        "Level": 1,
+        "Entries": 100
     }
 }

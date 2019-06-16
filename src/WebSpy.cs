@@ -17,14 +17,11 @@ namespace CandidateWebSpy
 {
     public partial class WebSpy : Form
     {
+
+     
       
       private short _step = 0;
-      private enum ID{
-        NONE = 0,
-        DNI = 1,
-        NIE = 2,
-        PASSAPORT = 3
-      }
+     
       public WebSpy()
       {
           InitializeComponent();      
@@ -44,21 +41,13 @@ namespace CandidateWebSpy
           wb.Navigate("https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12");       
       }
 
-      private void DoLogin(WebBrowser wb){      
-        //Read settings data
-        var definition = new { 
-          id = ID.NONE,  
-          user = "",
-          pass = ""
-        };
-
-        string json = File.ReadAllText("settings.json");
-        var settings = JsonConvert.DeserializeAnonymousType(json, definition);
+      private void DoLogin(WebBrowser wb){              
+        Settings settings = Settings.Load();
 
         // Do what ever you want to do here when page is completely loaded.           
-        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)settings.id).ToString());          
-        wb.Document.GetElementById("P12_USUARI").SetAttribute("value", settings.user);
-        wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", settings.pass);
+        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)settings.Credentials.id).ToString());          
+        wb.Document.GetElementById("P12_USUARI").SetAttribute("value", settings.credentials.user);
+        wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", settings.credentials.pass);
 
         List<HtmlElement> inputs = new List<HtmlElement>(wb.Document.GetElementsByTagName("input").Cast<HtmlElement>());            
         HtmlElement accept = inputs.Where(x => x.GetAttribute("type").Equals("button") && x.GetAttribute("name").Equals("P12_ACCEPTA")).SingleOrDefault();
@@ -76,6 +65,36 @@ namespace CandidateWebSpy
       }
 
       private void CheckChanges(string date){
+         var definition = new { 
+          last = DateTime.Now,
+          log = new List<string>()
+        };
+
+        string json = File.ReadAllText("output.json");
+        var settings = JsonConvert.DeserializeAnonymousType(json, definition);
+
+        StringBuilder sb = new StringBuilder();
+        StringWriter sw = new StringWriter(sb);
+
+        using (JsonWriter writer = new JsonTextWriter(sw))
+        {
+            writer.Formatting = Formatting.Indented;
+
+            writer.WriteStartObject();
+            writer.WritePropertyName("CPU");
+            writer.WriteValue("Intel");
+            writer.WritePropertyName("PSU");
+            writer.WriteValue("500W");
+            writer.WritePropertyName("Drives");
+            writer.WriteStartArray();
+            writer.WriteValue("DVD read/writer");
+            writer.WriteComment("(broken)");
+            writer.WriteValue("500 gigabyte hard drive");
+            writer.WriteValue("200 gigabyte hard drive");
+            writer.WriteEnd();
+            writer.WriteEndObject();
+        }
+
         //TODO: read the last date and update if it's newer; also update its value an send an email or warning.
         //TODO: add a log for tracking issues
       }
