@@ -77,7 +77,7 @@ namespace CandidateWebSpy
           mailMessage.From = new MailAddress(_settings.Mailing.From);
           mailMessage.To.Add(_settings.Mailing.To);
           mailMessage.IsBodyHtml = true;
-          mailMessage.Body = "<p>New changes has been detected into the applicant's desk.<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>";
+          mailMessage.Body = String.Format("<p>New changes has been detected into the applicant's desk, at {0}.<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>", date.ToString("dd/MM/yyyy HH:mm"));
           mailMessage.Subject = "New changes has been detected into the applicant's desk.";
           client.Send(mailMessage);               
         }
