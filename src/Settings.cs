@@ -39,6 +39,7 @@ namespace CandidateWebSpy
 
      public class SettingsMailing{
         public string SmtpServer;
+        public string SmtpPort;
         public string User;
         public string Pass;
         public string From;

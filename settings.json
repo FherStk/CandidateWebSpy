@@ -1,8 +1,8 @@
 {
     "Credentials" : {
-        "ID": "ID",
-        "User": "user",
-        "Pass": "pass",
+        "ID": "",
+        "User": "",
+        "Pass": "",
     },    
     "Polling": {
         "Interval": 30
@@ -13,10 +13,11 @@
     },
     "Mailing":
     {
-        "SmtpServer": "smtp.gmail.com",
-        "User": "user",
-        "Pass": "pass",
-        "From": "from",
-        "To": "To"
+        "SmtpServer": "aspmx.l.google.com",
+        "SmtpPort": "25",
+        "User": "",
+        "Pass": "",
+        "From": "",
+        "To": ""
     }
 }
