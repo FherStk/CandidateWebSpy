@@ -91,6 +91,7 @@ namespace CandidateWebSpy
       }
 
       private void WaitForPolling(WebBrowser wb){      
+        //TODO: show a progress bar with more usefull information and avoid using Thread.Sleep (sorry, not enough time to do things right :p)
         System.Threading.Thread.Sleep(_settings.Polling.Interval*1000);
         Navigate(wb);   
       }
