@@ -19,6 +19,12 @@ namespace CandidateWebSpy
     {
       
       private short _step = 0;
+      private enum ID{
+        NONE = 0,
+        DNI = 1,
+        NIE = 2,
+        PASSAPORT = 3
+      }
       public WebSpy()
       {
           InitializeComponent();      
@@ -41,7 +47,7 @@ namespace CandidateWebSpy
       private void DoLogin(WebBrowser wb){      
         //Read settings data
         var definition = new { 
-          id = "",  
+          id = ID.NONE,  
           user = "",
           pass = ""
         };
@@ -50,7 +56,7 @@ namespace CandidateWebSpy
         var settings = JsonConvert.DeserializeAnonymousType(json, definition);
 
         // Do what ever you want to do here when page is completely loaded.           
-        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value", settings.id);          
+        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)settings.id).ToString());          
         wb.Document.GetElementById("P12_USUARI").SetAttribute("value", settings.user);
         wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", settings.pass);
 
@@ -70,7 +76,8 @@ namespace CandidateWebSpy
       }
 
       private void CheckChanges(string date){
-        
+        //TODO: read the last date and update if it's newer; also update its value an send an email or warning.
+        //TODO: add a log for tracking issues
       }
 
       private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
