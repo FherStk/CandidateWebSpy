@@ -70,7 +70,7 @@ namespace CandidateWebSpy
           MailMessage mailMessage = new MailMessage(){
             From = new MailAddress(_settings.Mailing.From),            
             IsBodyHtml = true,
-            Body = String.Format("<p>New changes has been detected into the applicant's desk, at {0}.<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>", date.ToString("dd/MM/yyyy HH:mm")),
+            Body = String.Format("<p>New changes has been detected into the applicant's desk, on {0}.<br/><a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>", date.ToString("dd/MM/yyyy HH:mm")),
             Subject = "New changes has been detected into the applicant's desk."
           };
 
