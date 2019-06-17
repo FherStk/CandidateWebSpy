@@ -5,6 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
+
+//TODO: minimized to system tray by default
 
 namespace CandidateWebSpy
 {
@@ -12,53 +15,48 @@ namespace CandidateWebSpy
     {
       private short _step = 0;
       private Settings _settings;
+      private TimeSpan _time;
      
       public WebSpy()
       {
         _settings = Settings.Load();
 
         InitializeComponent();                
-        WebBrowser wb = new WebBrowser();          
-
-        this.Controls.Add(wb);
-        wb.Visible = false;
-        //wb.Visible = true;
-        //wb.Size = new System.Drawing.Size(800, 450);
-
-        wb.DocumentCompleted += DocumentCompleted;
-        wb.ScrollBarsEnabled = false;
-        wb.ScriptErrorsSuppressed = true;     
-
-        Navigate(wb);     
+        Navigate();     
       }    
 
-      private void Navigate(WebBrowser wb){
+      private void Navigate(){
         _step = 0;
-        wb.Navigate("https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12");       
+        this.label.Text = "Navigating to the applicant's desk website...";
+        this.wb.Navigate("https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12");       
       }
 
-      private void DoLogin(WebBrowser wb){              
+      private void DoLogin(){     
+        this.label.Text = "Logging in...";
+
         // Do what ever you want to do here when page is completely loaded.           
-        wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)_settings.Credentials.ID).ToString());          
-        wb.Document.GetElementById("P12_USUARI").SetAttribute("value", _settings.Credentials.User);
-        wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", _settings.Credentials.Pass);
+        this.wb.Document.GetElementById("P12_IDENTIFICADOR").SetAttribute("value",  ((int)_settings.Credentials.ID).ToString());          
+        this.wb.Document.GetElementById("P12_USUARI").SetAttribute("value", _settings.Credentials.User);
+        this.wb.Document.GetElementById("P12_PASSWORD").SetAttribute("value", _settings.Credentials.Pass);
 
         List<HtmlElement> inputs = new List<HtmlElement>(wb.Document.GetElementsByTagName("input").Cast<HtmlElement>());            
         HtmlElement accept = inputs.Where(x => x.GetAttribute("type").Equals("button") && x.GetAttribute("name").Equals("P12_ACCEPTA")).SingleOrDefault();
         accept.InvokeMember("click");        
       }
 
-      private DateTime ReadDate(WebBrowser wb){       
-          List<HtmlElement> tds = new List<HtmlElement>(wb.Document.GetElementsByTagName("td").Cast<HtmlElement>());            
-          HtmlElement node = tds.Where(x => x.InnerText != null && x.InnerText.Equals("Última modificació")).FirstOrDefault();     
-          
-          tds = new List<HtmlElement>(node.Parent.NextSibling.Children.Cast<HtmlElement>());  
-          node = tds.Last();
+      private DateTime ReadDate(){      
+        this.label.Text = "Reading the update timestamp..."; 
+        List<HtmlElement> tds = new List<HtmlElement>(wb.Document.GetElementsByTagName("td").Cast<HtmlElement>());            
+        HtmlElement node = tds.Where(x => x.InnerText != null && x.InnerText.Equals("Última modificació")).FirstOrDefault();     
+        
+        tds = new List<HtmlElement>(node.Parent.NextSibling.Children.Cast<HtmlElement>());  
+        node = tds.Last();
 
-          return DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        return DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
       }
 
       private void StoreChanges(DateTime date){
+        this.label.Text = "Storing changes..."; 
         Output output = Output.Load();
         
         if(output.Last >= date) output.Log.Add(string.Format("{0}: No changes detected.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")));
@@ -90,26 +88,38 @@ namespace CandidateWebSpy
         Output.Store(output);     
       }
 
-      private void WaitForPolling(WebBrowser wb){      
-        //TODO: show a progress bar with more usefull information and avoid using Thread.Sleep (sorry, not enough time to do things right :p)
-        System.Threading.Thread.Sleep(_settings.Polling.Interval*1000);
-        Navigate(wb);   
+      private void WaitForPolling(){                             
+        _time = new TimeSpan(0,0,_settings.Polling.Interval);                
+        this.pb.Maximum = _settings.Polling.Interval;
+
+        this.timer.Start();
       }
 
-      private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-      {
-        WebBrowser wb = (WebBrowser)sender;
+      private void WebBrowserDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e){
         switch(_step++){
           case 0:                         
-            DoLogin(wb);
+            DoLogin();
             break;
 
           case 1:
-            DateTime date = ReadDate(wb);
+            DateTime date = ReadDate();
             StoreChanges(date);
-            WaitForPolling(wb);             
+            WaitForPolling();             
             break;
         }
+      }
+
+      private void TimerTick(object sender, EventArgs e){
+        _time = _time.Subtract(new TimeSpan(0, 0, 1));
+        
+        this.label.Text = string.Format("Waiting {0:00}:{1:00}:{2:00} for the next call...", _time.Days, _time.Minutes, _time.Seconds);  
+        this.pb.Value++; 
+
+        if(_time.TotalSeconds == 0){
+          this.timer.Stop();
+          this.pb.Value = 0;
+          Navigate();   
+        }  
       }
     }
 }
