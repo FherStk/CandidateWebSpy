@@ -54,31 +54,34 @@ namespace CandidateWebSpy
         DateTime temp = DateTime.Now;
         int s = 0;
 
-        while(node.Parent.NextSibling != null || s++ < 8){
+        //TODO: fix this
+        node = node.Parent;
+        while(s++ < 8 || node.NextSibling != null){
+          node = node.NextSibling;
+
           if(s % 2 > 0){
-              tds = new List<HtmlElement>(node.Parent.NextSibling.Children.Cast<HtmlElement>());  
-              node = tds.Last();
-              temp = DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
-              break;
+            tds = new List<HtmlElement>(node.Children.Cast<HtmlElement>());  
+            node = tds.Last();
+            temp = DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+
+            switch(s){
+              case 1:
+                od.Ratings = temp;
+                break;
+              
+              case 3:
+                od.Advertisements = temp;
+                break;
+
+              case 5:
+                od.Lists = temp;
+                break;
+
+              case 7:
+                od.Announcements = temp;
+                break;
+            }          
           }
-
-          switch(s){
-            case 1:
-              od.Ratings = temp;
-              break;
-            
-            case 3:
-              od.Advertisements = temp;
-              break;
-
-            case 5:
-              od.Lists = temp;
-              break;
-
-            case 7:
-              od.Announcements = temp;
-              break;
-          }          
         }        
 
         return od;
