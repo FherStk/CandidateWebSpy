@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace CandidateWebSpy
 {
     public class Output{
-        public DateTime Last {get; set;}
+        public OutputDates Dates {get; set;}
         public List<string> Log {get; set;}      
 
         public static Output Load(){
@@ -17,4 +17,11 @@ namespace CandidateWebSpy
             File.WriteAllText("data/output.json", JsonConvert.SerializeObject(o));
         }
     }   
+
+    public class OutputDates{
+        public DateTime Ratings {get; set;}
+        public DateTime Advertisements {get; set;}
+        public DateTime Lists {get; set;}
+        public DateTime Announcements {get; set;}
+    }
 }

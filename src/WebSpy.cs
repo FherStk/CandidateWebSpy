@@ -44,31 +44,96 @@ namespace CandidateWebSpy
         accept.InvokeMember("click");        
       }
 
-      private DateTime ReadDate(){      
-        this.label.Text = "Reading the update timestamp..."; 
+      private OutputDates ReadDates(){      
+        this.label.Text = "Reading the update timestamps..."; 
         List<HtmlElement> tds = new List<HtmlElement>(wb.Document.GetElementsByTagName("td").Cast<HtmlElement>());            
-        HtmlElement node = tds.Where(x => x.InnerText != null && x.InnerText.Equals("Última modificació")).FirstOrDefault();     
-        
-        tds = new List<HtmlElement>(node.Parent.NextSibling.Children.Cast<HtmlElement>());  
-        node = tds.Last();
+        HtmlElement node = tds.Where(x => x.InnerText != null && x.InnerText.Equals("Última modificació")).FirstOrDefault();                   
 
-        return DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        
+        OutputDates od = new OutputDates();
+        DateTime temp = DateTime.Now;
+        int s = 0;
+
+        while(node.Parent.NextSibling != null || s++ < 8){
+          if(s % 2 > 0){
+              tds = new List<HtmlElement>(node.Parent.NextSibling.Children.Cast<HtmlElement>());  
+              node = tds.Last();
+              temp = DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+              break;
+          }
+
+          switch(s){
+            case 1:
+              od.Ratings = temp;
+              break;
+            
+            case 3:
+              od.Advertisements = temp;
+              break;
+
+            case 5:
+              od.Lists = temp;
+              break;
+
+            case 7:
+              od.Announcements = temp;
+              break;
+          }          
+        }        
+
+        return od;
       }
 
-      private void StoreChanges(DateTime date){
+      private void StoreChanges(OutputDates dates){
         this.label.Text = "Storing changes..."; 
         Output output = Output.Load();
+
+        bool updated = false;
+        string msg;
+        List<string> messages = new List<string>();
+        if(output.Dates.Ratings < dates.Ratings){
+          updated = true;
+          output.Dates.Ratings = dates.Ratings;                    
+          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "ratings");
+          messages.Add(msg);
+        }
+
+        if(output.Dates.Advertisements < dates.Advertisements){
+          updated = true;
+          output.Dates.Advertisements = dates.Advertisements;          
+          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "advertisements");
+          messages.Add(msg);
+        }
+
+        if(output.Dates.Lists < dates.Lists){
+          updated = true;
+          output.Dates.Lists = dates.Lists;          
+          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "lists");
+          messages.Add(msg);
+        }
+
+        if(output.Dates.Announcements < dates.Announcements){
+          updated = true;
+          output.Dates.Announcements = dates.Announcements;          
+          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "announcements");
+          messages.Add(msg);
+        }       
         
-        if(output.Last >= date) output.Log.Add(string.Format("{0}: No changes detected.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")));
-        else{
-          output.Last = date;
-          output.Log.Add(string.Format("{0}: New changes has been detected on {1}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), date.ToString("dd/MM/yyyy HH:mm")));
+        if(!updated) output.Log.Add(string.Format("{0}: No changes detected.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")));
+        else{   
+
+          string body = "<p>New changes has been detected into the applicant's desk: </p><ul>";
+          foreach(string m in messages){
+            output.Log.Add(m);
+            body = string.Format("{0} <li>{1}</li>", body, m);
+          }          
+          string.Format("{0}</ul><p>{1}</p>", body, "<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a>");
 
 
           MailMessage mailMessage = new MailMessage(){
             From = new MailAddress(_settings.Mailing.From),            
             IsBodyHtml = true,
-            Body = String.Format("<p>New changes has been detected into the applicant's desk, on {0}.<br/><a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a></p>", date.ToString("dd/MM/yyyy HH:mm")),
+            Body = body,
             Subject = "New changes has been detected into the applicant's desk."
           };
 
@@ -102,8 +167,8 @@ namespace CandidateWebSpy
             break;
 
           case 1:
-            DateTime date = ReadDate();
-            StoreChanges(date);
+            OutputDates dates = ReadDates();
+            StoreChanges(dates);
             WaitForPolling();             
             break;
         }
