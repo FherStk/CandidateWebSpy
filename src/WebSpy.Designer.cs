@@ -41,7 +41,7 @@ namespace CandidateWebSpy
             //this.ClientSize = new System.Drawing.Size(800, 450);
             this.ClientSize = new System.Drawing.Size(400, 140);
             this.MaximumSize = this.ClientSize;
-            this.Text = "Applicant's web spy - Alpha 2 (v0.0.2.0)";                  
+            this.Text = "Applicant's web spy - Alpha 2.1 (v0.0.2.1)";                  
 
             //WEB BROWSER
             this.wb = new WebBrowser();                  

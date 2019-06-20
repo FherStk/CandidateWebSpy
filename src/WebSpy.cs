@@ -91,33 +91,33 @@ namespace CandidateWebSpy
         Output output = Output.Load();
 
         bool updated = false;
-        string msg;
+        string msg = "New changes has been detected on {0} for {1}";
         List<string> messages = new List<string>();
         if(output.Dates.Ratings < dates.Ratings){
           updated = true;
           output.Dates.Ratings = dates.Ratings;                    
-          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "ratings");
+          msg = string.Format(msg, dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "ratings");
           messages.Add(msg);
         }
 
         if(output.Dates.Advertisements < dates.Advertisements){
           updated = true;
           output.Dates.Advertisements = dates.Advertisements;          
-          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "advertisements");
+          msg = string.Format(msg, dates.Advertisements.ToString("dd/MM/yyyy HH:mm"), "advertisements");
           messages.Add(msg);
         }
 
         if(output.Dates.Lists < dates.Lists){
           updated = true;
-          output.Dates.Lists = dates.Lists;          
-          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "lists");
+          output.Dates.Lists = dates.Lists;  
+          msg = string.Format(msg, dates.Lists.ToString("dd/MM/yyyy HH:mm"), "lists");        
           messages.Add(msg);
         }
 
         if(output.Dates.Announcements < dates.Announcements){
           updated = true;
-          output.Dates.Announcements = dates.Announcements;          
-          msg = string.Format("{0}: New changes has been detected on {1} for {2}.", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), dates.Ratings.ToString("dd/MM/yyyy HH:mm"), "announcements");
+          output.Dates.Announcements = dates.Announcements;  
+          msg = string.Format(msg, dates.Announcements.ToString("dd/MM/yyyy HH:mm"), "announcements");        
           messages.Add(msg);
         }       
         
@@ -126,7 +126,7 @@ namespace CandidateWebSpy
 
           string body = "<p>New changes has been detected into the applicant's desk: </p><ul>";
           foreach(string m in messages){
-            output.Log.Add(m);
+            output.Log.Add(string.Format("{0}: {1}", DateTime.Now, m));
             body = string.Format("{0} <li>{1}</li>", body, m);
           }          
           body = string.Format("{0}</ul><p>{1}</p>", body, "<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a>");
