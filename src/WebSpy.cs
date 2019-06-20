@@ -56,13 +56,12 @@ namespace CandidateWebSpy
 
         //TODO: fix this
         node = node.Parent;
-        while(s++ < 8 || node.NextSibling != null){
+        while(s++ < 8 && node.NextSibling != null){
           node = node.NextSibling;
 
           if(s % 2 > 0){
             tds = new List<HtmlElement>(node.Children.Cast<HtmlElement>());  
-            node = tds.Last();
-            temp = DateTime.ParseExact(node.InnerText, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+            temp =DateTime.ParseExact((tds.Last().InnerText == null ? "01/01/1900 00:00" : tds.Last().InnerText), "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
 
             switch(s){
               case 1:
@@ -130,7 +129,7 @@ namespace CandidateWebSpy
             output.Log.Add(m);
             body = string.Format("{0} <li>{1}</li>", body, m);
           }          
-          string.Format("{0}</ul><p>{1}</p>", body, "<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a>");
+          body = string.Format("{0}</ul><p>{1}</p>", body, "<a href='https://aplicacions.ensenyament.gencat.cat/pls/apex/f?p=2016001:12'>Check it here!</a>");
 
 
           MailMessage mailMessage = new MailMessage(){
